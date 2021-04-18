@@ -6,6 +6,9 @@ import { DropDownList } from '@progress/kendo-react-dropdowns';
 import { Button } from '@progress/kendo-react-buttons';
 
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
+import { filterBy } from '@progress/kendo-data-query';
+import { ColumnMenu } from './columnMenu.jsx';
+
 
 import moment from 'moment';
 
@@ -108,8 +111,25 @@ class Production extends Component {
         this.state = {
             testTempVar: 0,
             packetByMill: 0,
-            packetDifference: 0
+            packetDifference: 0,
+
+            skip: 0,
+            take: 10,
+
+            filter: {
+                logic: "and",
+                filters: [
+                    { field: "gsm", operator: "contains", value: "15" }
+                ]
+            }
         }
+    }
+
+    pageChange = (event) => {
+        this.setState({
+            skip: event.page.skip,
+            take: event.page.take
+        });
     }
 
     componentDidMount() {
@@ -133,6 +153,7 @@ class Production extends Component {
         values.packetDifference = diff;
 
         this.props.setFormData(values);
+        console.log("Hardik into onubmit()  ")
         this.props.getDbRollDetails();
     }
 
@@ -162,100 +183,123 @@ class Production extends Component {
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', width: 50 }}>
 
-                                    
+
 
                                         {/* <div style={{ width: 950 }}> */}
-                                            <form onSubmit={handleSubmit}>
+                                        <form onSubmit={handleSubmit}>
 
-                                                <fieldset>
+                                            <fieldset>
 
-                                                    <label name="packetsByMill">Date <br></br></label>
-                                                    <Field
-                                                        name="date"
-                                                        component={DateTimePicker}
-                                                        format={"dd-MM-yyyy hh:mm:ss a"}
-                                                        defaultValue={this.defaultValue}
-                                                        label="Date And Time" />
+                                                <label name="packetsByMill">Date <br></br></label>
+                                                <Field
+                                                    name="date"
+                                                    component={DateTimePicker}
+                                                    format={"dd-MM-yyyy hh:mm:ss a"}
+                                                    defaultValue={this.defaultValue}
+                                                    label="Date And Time" />
 
-                                                    <Field
-                                                        name="machineSize"
-                                                        component={DropDownList}
-                                                        data={[22, 29]}
-                                                        label="Machine Size" />
+                                                <Field
+                                                    name="machineSize"
+                                                    component={DropDownList}
+                                                    data={[22, 29]}
+                                                    label="Machine Size" />
 
-                                                    <Field
-                                                        name="rollSize"
-                                                        component={DropDownList}
-                                                        data={[22, 27, 29, 30, 33, 40]}
-                                                        label="Roll Size" />
+                                                <Field
+                                                    name="rollSize"
+                                                    component={DropDownList}
+                                                    data={[22, 27, 29, 30, 33, 40]}
+                                                    label="Roll Size" />
 
-                                                    <Field
-                                                        name="gsm"
-                                                        component={DropDownList}
-                                                        data={[14, 15, 16, 17, 18]}
-                                                        label="GSM" />
+                                                <Field
+                                                    name="gsm"
+                                                    component={DropDownList}
+                                                    data={[14, 15, 16, 17, 18]}
+                                                    label="GSM" />
 
-                                                    <Field
-                                                        name="ppp"
-                                                        component={DropDownList}
-                                                        data={[44, 45, 74, 75, 76, 77, 78, 79, 80, 94, 95, 96, 97, 98, 99, 100]}
-                                                        label="Pieces per Packet" />
+                                                <Field
+                                                    name="ppp"
+                                                    component={DropDownList}
+                                                    data={[44, 45, 74, 75, 76, 77, 78, 79, 80, 94, 95, 96, 97, 98, 99, 100]}
+                                                    label="Pieces per Packet" />
 
-                                                    <Field
-                                                        name="millWeight"
-                                                        component={NumericTextBox}
-                                                        min={1}
-                                                        label="Mill Weight" />
+                                                <Field
+                                                    name="millWeight"
+                                                    component={NumericTextBox}
+                                                    min={1}
+                                                    label="Mill Weight" />
 
-                                                    <Field
-                                                        name="wastePolythene"
-                                                        component={NumericTextBox}
-                                                        min={1}
-                                                        label="Waste Polythene" />
+                                                <Field
+                                                    name="wastePolythene"
+                                                    component={NumericTextBox}
+                                                    min={1}
+                                                    label="Waste Polythene" />
 
-                                                    <Field
-                                                        name="packetsByFactory"
-                                                        component={NumericTextBox}
-                                                        min={1}
-                                                        label="Packets By Factory" />
+                                                <Field
+                                                    name="packetsByFactory"
+                                                    component={NumericTextBox}
+                                                    min={1}
+                                                    label="Packets By Factory" />
 
-                                                    <br></br>
+                                                <br></br>
 
-                                                    <label name="packetsByMill">Packets By Mill <br></br></label>
-                                                    <input readOnly value={this.state.packetByMill} /><br></br><br></br>
+                                                <label name="packetsByMill">Packets By Mill <br></br></label>
+                                                <input readOnly value={this.state.packetByMill} /><br></br><br></br>
 
-                                                    <label name="wasteOfPacket">Waste of Packet <br></br></label>
-                                                    <input readOnly value={this.state.packetDifference} />
+                                                <label name="wasteOfPacket">Waste of Packet <br></br></label>
+                                                <input readOnly value={this.state.packetDifference} />
 
-                                                    <div className="k-form-buttons">
-                                                        <Button type="submit" primary={true} disabled={submitting || !valid}>
+                                                <div className="k-form-buttons">
+
+                                                <Button type="submit" primary={true} disabled={submitting || !valid}>
                                                             Submit Roll Details
                                         </Button>
+
                                         &nbsp;
                                         <Button onClick={reset}>
-                                                            Reset
+                                                        Reset
                                         </Button>
 
-                                                    </div>
-                                                </fieldset>
+                                                </div>
+                                            </fieldset>
 
-                                            </form>
-                                        </div>
+                                        </form>
+                                    </div>
 
-                                        <Grid
-                                            style={{ height: '800px' }}
-                                            data={this.props.dbRollData}
-                                        >
-                                            <Column field="date" title="Date" width="120px" />
-                                            <Column field="gsm" title="GSM" width="60px" />
-                                            <Column field="machineSize" title="Machine Size" width="110px"/>
-                                            <Column field="packetByMill" title="Packet By Mill" width="120px"/>
-                                            <Column field="packetsByFactory" title="Packet By Factory" width="140px"/>
-                                            <Column field="packetDifference" title="Packet Difference" cell={cellWithBackGround} />
+                                    
+                                    <Grid
+                                        style={{ height: '400px' }}
+                                        
 
-                                        </Grid>
-                                        {console.log('dbRolllDattttt final by selector', this.props.dbRollData)}
-                                    {/* </div> */}
+
+
+                                        data={filterBy(this.props.dbRollData.slice(this.state.skip, this.state.take + this.state.skip),this.state.filter)}
+                                        
+                                        //data={filterBy(this.props.dbRollData, this.state.filter)}
+
+                                        skip={this.state.skip}
+                                        take={this.state.take}
+                                        total={this.props.dbRollData.length}
+                                        pageable={true}
+                                        onPageChange={this.pageChange}
+
+
+                                        filterable={true}
+
+                                        filter={this.state.filter}
+                                        onFilterChange={(e) => {
+                                            this.setState({
+                                                filter: e.filter
+                                            });
+                                        }}
+                                    >
+                                        <Column field="date" title="Date" width="200px" filter="date" />
+                                        <Column field="gsm" title="GSM" width="200px" filter="numeric" />
+                                        <Column field="machineSize" title="Machine Size" width="200px" filter="numeric" />
+                                        <Column field="packetByMill" title="Packet By Mill" width="200px" filter="numeric" />
+                                        <Column field="packetsByFactory" title="Packet By Factory" width="200px" filter="numeric" />
+                                        <Column field="packetDifference" title="Packet Difference" cell={cellWithBackGround} filter="numeric" />
+
+                                    </Grid>
 
                                 </FormElement>
 
