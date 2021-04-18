@@ -7,8 +7,6 @@ import { Button } from '@progress/kendo-react-buttons';
 
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import { filterBy } from '@progress/kendo-data-query';
-import { ColumnMenu } from './columnMenu.jsx';
-
 
 import moment from 'moment';
 
