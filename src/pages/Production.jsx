@@ -8,7 +8,9 @@ import { Button } from '@progress/kendo-react-buttons';
 import { Grid, GridColumn as Column } from '@progress/kendo-react-grid';
 import { filterBy } from '@progress/kendo-data-query';
 
-import moment from 'moment';
+import { Notification } from '@progress/kendo-react-notification';
+
+import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 
 import { connect } from 'react-redux';
 import { createStructuredSelector } from "reselect";
@@ -99,6 +101,7 @@ class cellWithBackGround extends React.Component {
     }
 }
 
+
 class Production extends Component {
 
     defaultValue = new Date();
@@ -110,6 +113,7 @@ class Production extends Component {
             testTempVar: 0,
             packetByMill: 0,
             packetDifference: 0,
+            visible: false,
 
             skip: 0,
             take: 10,
@@ -117,10 +121,16 @@ class Production extends Component {
             filter: {
                 logic: "and",
                 filters: [
-                    { field: "gsm", operator: "contains", value: "15" }
+                    // { field: "gsm", operator: "contains", value: "15" }
                 ]
             }
         }
+    }
+
+    toggleDialog = () => {
+        this.setState({
+            visible: !this.state.visible
+        });
     }
 
     pageChange = (event) => {
@@ -135,6 +145,8 @@ class Production extends Component {
     }
 
     onSubmit = values => {
+
+
 
         var sol_1 = (values.machineSize * values.rollSize * values.gsm * values.ppp) / 10000000;
 
@@ -153,12 +165,18 @@ class Production extends Component {
         this.props.setFormData(values);
         console.log("Hardik into onubmit()  ")
         this.props.getDbRollDetails();
+
+        this.setState({ visible: true })
+
+
     }
 
     handleChange = (e) => {
 
         this.setState({ value: e.target.value });
     };
+
+
 
 
     render() {
@@ -248,8 +266,8 @@ class Production extends Component {
 
                                                 <div className="k-form-buttons">
 
-                                                <Button type="submit" primary={true} disabled={submitting || !valid}>
-                                                            Submit Roll Details
+                                                    <Button type="submit" primary={true} disabled={submitting || !valid}>
+                                                        Submit Roll Details
                                         </Button>
 
                                         &nbsp;
@@ -263,16 +281,12 @@ class Production extends Component {
                                         </form>
                                     </div>
 
-                                    
+
                                     <Grid
                                         style={{ height: '400px' }}
-                                        
 
+                                        data={filterBy(this.props.dbRollData.slice(this.state.skip, this.state.take + this.state.skip), this.state.filter)}
 
-
-                                        data={filterBy(this.props.dbRollData.slice(this.state.skip, this.state.take + this.state.skip),this.state.filter)}
-                                        
-                                        //data={filterBy(this.props.dbRollData, this.state.filter)}
 
                                         skip={this.state.skip}
                                         take={this.state.take}
@@ -306,6 +320,14 @@ class Production extends Component {
                     }
                 </div>
 
+                <div>
+                    {this.state.visible && <Dialog title={"Alert"} onClose={this.toggleDialog}>
+                        <p style={{ margin: "25px", textAlign: "center", color: "black" }}>Roll Details Submitted Successfully.</p>
+                        {<DialogActionsBar>
+                            <button className="k-button" onClick={this.toggleDialog}>Okay</button>
+                        </DialogActionsBar>}
+                    </Dialog>}
+                </div>
             </React.Fragment>
         );
 
